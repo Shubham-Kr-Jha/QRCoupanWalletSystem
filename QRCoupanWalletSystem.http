@@ -1,0 +1,6 @@
+@QRCoupanWalletSystem_HostAddress = http://localhost:5267
+
+GET {{QRCoupanWalletSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
