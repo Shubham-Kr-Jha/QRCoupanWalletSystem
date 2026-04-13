@@ -16,9 +16,10 @@ namespace QRCoupanWalletSystem.Models
         public DateTime? RedeemedAt { get; set; }
         public int? RedeemedByUserId { get; set; }
 
-        // Idempotency token for redemption (to guard against duplicate requests)
         public string? RedemptionIdempotencyKey { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }
+
+        public List<Transaction> Transactions { get; set; } = new();
     }
 }

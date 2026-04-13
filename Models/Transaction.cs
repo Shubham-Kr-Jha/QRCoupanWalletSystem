@@ -13,8 +13,10 @@ namespace QRCoupanWalletSystem.Models
         public TransactionType Type { get; set; }
         public decimal Amount { get; set; }
 
-        // Idempotency token or external id to avoid duplicates
         public string? ExternalId { get; set; }
+
+        public int? CouponId { get; set; }
+        public Coupon? Coupon { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

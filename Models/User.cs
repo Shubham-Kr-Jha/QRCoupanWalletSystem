@@ -13,7 +13,6 @@ namespace QRCoupanWalletSystem.Models
         public Wallet? Wallet { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }
-        // Role for simple role-based authorization (e.g. "User", "Admin")
         public string Role { get; set; } = "User";
     }
 }

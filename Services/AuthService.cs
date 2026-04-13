@@ -28,30 +28,12 @@ namespace QRCoupanWalletSystem.Services
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            // create wallet
             var wallet = new Wallet { UserId = user.Id, Balance = 0m };
             _db.Wallets.Add(wallet);
             await _db.SaveChangesAsync();
 
             return user;
         }
-
-        public async Task<User> RegisterAdmin(string email, string password)
-        {
-            if (await _db.Users.AnyAsync(u => u.Email == email))
-                throw new ApplicationException("Email already registered");
-
-            var user = new User { Email = email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(password), Role = "Admin" };
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
-            var wallet = new Wallet { UserId = user.Id, Balance = 0m };
-            _db.Wallets.Add(wallet);
-            await _db.SaveChangesAsync();
-
-            return user;
-        }
-
         public async Task<string?> Login(string email, string password)
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);

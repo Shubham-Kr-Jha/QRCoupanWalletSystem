@@ -28,6 +28,12 @@ namespace QRCoupanWalletSystem.Data
                 .WithMany(w => w.Transactions)
                 .HasForeignKey(t => t.WalletId);
 
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.Coupon)
+                .WithMany(c => c.Transactions)
+                .HasForeignKey(t => t.CouponId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Coupon>()
                 .HasOne(c => c.Campaign)
                 .WithMany(ca => ca.Coupons)
@@ -39,6 +45,10 @@ namespace QRCoupanWalletSystem.Data
             modelBuilder.Entity<Coupon>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<Wallet>().HasQueryFilter(w => !w.IsDeleted);
             modelBuilder.Entity<Transaction>().HasQueryFilter(t => !t.IsDeleted);
+
+            modelBuilder.Entity<Wallet>().Property(w => w.Balance).HasPrecision(18, 2);
+            modelBuilder.Entity<Coupon>().Property(c => c.Amount).HasPrecision(18, 2);
+            modelBuilder.Entity<Transaction>().Property(t => t.Amount).HasPrecision(18, 2);
         }
     }
 }

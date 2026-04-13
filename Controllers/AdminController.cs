@@ -15,9 +15,9 @@ namespace QRCoupanWalletSystem.Controllers
         private readonly AppDbContext _db;
         private readonly ICouponService _couponService;
         private readonly QRCoupanWalletSystem.Services.IAuthService _authService;
-        private readonly IConfiguration _config;
+        private readonly IConfiguration? _config;
 
-        public AdminController(AppDbContext db, ICouponService couponService, QRCoupanWalletSystem.Services.IAuthService authService, IConfiguration config)
+        public AdminController(AppDbContext db, ICouponService couponService, QRCoupanWalletSystem.Services.IAuthService authService, IConfiguration? config = null)
         {
             _db = db;
             _couponService = couponService;
@@ -79,23 +79,6 @@ namespace QRCoupanWalletSystem.Controllers
         {
             await _couponService.ReconcileAsync();
             return Ok(new { reconciled = true });
-        }
-
-        // Seed admin if configured
-        [AllowAnonymous]
-        [HttpPost("seed-admin")]
-        public async Task<IActionResult> SeedAdmin()
-        {
-            var adminEmail = _config["Admin:Email"];
-            var adminPassword = _config["Admin:Password"];
-            if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
-                return BadRequest(new { error = "Admin credentials not configured" });
-
-            if (await _db.Users.AnyAsync(u => u.Email == adminEmail))
-                return BadRequest(new { error = "Admin already exists" });
-
-            await _authService.RegisterAdmin(adminEmail, adminPassword);
-            return Ok(new { created = true });
         }
 
         public record CreateCampaignDto(string Name, DateTime StartsAt, DateTime EndsAt);
