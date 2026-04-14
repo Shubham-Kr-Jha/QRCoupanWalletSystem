@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QRCoupanWalletSystem.Data;
 using QRCoupanWalletSystem.Models;
 using QRCoupanWalletSystem.Services;
+using QRCoder;
 
 namespace QRCoupanWalletSystem.Controllers
 {
@@ -63,6 +64,7 @@ namespace QRCoupanWalletSystem.Controllers
             if (campaign == null) return NotFound();
 
             var coupons = new List<Coupon>();
+            var result = new List<object>();
             for (int i = 0; i < dto.Count; i++)
             {
                 var code = Guid.NewGuid().ToString("N").Substring(0, 12).ToUpperInvariant();
@@ -71,7 +73,20 @@ namespace QRCoupanWalletSystem.Controllers
             }
             _db.Coupons.AddRange(coupons);
             await _db.SaveChangesAsync();
-            return Ok(coupons.Select(c => c.Code));
+
+            // Generate QR codes (PNG base64) for each coupon using PngByteQRCode
+            var generator = new QRCoder.QRCodeGenerator();
+            foreach (var c in coupons)
+            {
+                var payload = c.Code; // simple payload; can include signed data if required
+                var data = generator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.M);
+                var png = new QRCoder.PngByteQRCode(data).GetGraphic(20);
+                var base64 = Convert.ToBase64String(png);
+                var dataUrl = $"data:image/png;base64,{base64}";
+                result.Add(new { code = c.Code, qrcode = dataUrl });
+            }
+
+            return Ok(result);
         }
 
         [HttpPost("reconcile")]

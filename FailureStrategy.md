@@ -8,11 +8,7 @@ This document explains expected system behavior and recovery for three critical 
   - Controllers will return 500 unless they handle the error explicitly.
 - Detection
   - Logs from service catch blocks and authentication debug logs will show the error details.
-- Recommendations & recovery
-  - Automatic rollback prevents partial commits.
-  - Implement transient retry policies (EF Core resilient execution or Polly) to handle transient DB issues.
-  - Return HTTP 503 for prolonged outages and implement a durable retry queue for critical operations.
-  - Add DB health monitoring and alerts.
+
 
 2) Duplicate request arrives (client retry / network retry)
 - What happens now
@@ -20,9 +16,7 @@ This document explains expected system behavior and recovery for three critical 
   - If the client does not reuse the idempotency key (e.g., uses a new key): the second request is treated as a new attempt; because the coupon is already marked `Redeemed` within a serializable transaction, the second attempt will not apply another credit and will return failure.
 - Why this is safe
   - Idempotency keys + in-transaction coupon marking prevent double-credit.
-- Recommendations
-  - Prefer client-generated idempotency keys for retry semantics.
-  - Optionally implement a dedicated idempotency table to persist keys and operation results for robust, long-lived idempotency.
+
 
 3) Partial transaction occurs (wallet updated but coupon not marked, or transaction created but wallet not updated)
 - How it can happen
@@ -31,11 +25,3 @@ This document explains expected system behavior and recovery for three critical 
   - `CouponService.ReconcileAsync` scans transactions and detects mismatches: transaction exists but coupon not marked redeemed, or wallet balance differs from sum of transactions.
 - Recovery
   - Reconciliation marks the coupon redeemed (sets `RedemptionIdempotencyKey`) and recomputes the wallet balance from transactions (SUM) to correct inconsistencies. Changes are saved to the DB.
-- Recommendations
-  - Set `tx.CouponId = coupon.Id` at redemption to make reconciliation robust (FK-based). Update `ReconcileAsync` to prefer `Transaction.CouponId` over text parsing.
-  - Run reconciliation periodically via background worker and alert on corrections.
-
-Summary
-- DB failure: operations rollback; add retries and durable queues.
-- Duplicate requests: idempotency prevents double-application when keys are reused.
-- Partial transactions: reconciliation repairs inconsistent states; prefer FK-based links and schedule reconciliation periodically.

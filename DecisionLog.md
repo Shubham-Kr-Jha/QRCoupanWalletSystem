@@ -24,11 +24,6 @@ Edge cases handled
 - Expired/invalid coupons: `RedeemCoupon` verifies campaign window and coupon status before applying.
 - Duplicate registration: `AuthService.Register` enforces unique email addresses.
 
-Remaining risks and limitations
-- Reconciliation currently parses transaction notes; prefer `Transaction.CouponId` FK for robust linking (migration already added the FK).
-- Admin promotion is manual (DB update). Add admin management API for secure promotions.
-- Serializable transactions are safe but may limit throughput at large scale; consider optimistic concurrency or event-driven patterns when scaling.
-
 Trade-offs
 - Prioritized correctness, traceability, and simplicity: ACID transactions + idempotency + reconciliation. Left out complex architectures (CQRS, event sourcing) to keep scope focused and reviewable.
 
@@ -41,10 +36,6 @@ Quick verification (endpoints)
 Migrations
 - `Migrations/` includes `InitialCreate`, `AddUserRole`, `LinkTransactionToCouponAndPrecision`.
 
-Recommended next steps
-1) Update `CouponService.ReconcileAsync` to use `Transaction.CouponId` FK as primary link (robust reconciliation).
-2) Add Admin management endpoints to promote users securely (protected by Admin role).
-3) Add background reconciliation worker and alerting.
 
 
 
