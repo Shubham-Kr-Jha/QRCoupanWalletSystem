@@ -57,7 +57,7 @@ namespace QRCoupanWalletSystem.Controllers
             return Ok(campaign);
         }
 
-        [HttpPost("campaigns/{campaignId}/generate")]
+        [HttpPost("campaigns/{campaignId}/generateCoupons")]
         public async Task<IActionResult> GenerateCoupons(int campaignId, [FromBody] GenerateDto dto)
         {
             var campaign = await _db.Campaigns.FirstOrDefaultAsync(c => c.Id == campaignId);
